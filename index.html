@@ -10,11 +10,41 @@ body {
   background: #0f172a;
   color: white;
   text-align: center;
+  margin: 0;
 }
 
 h1 {
   color: #22c55e;
+  padding: 15px;
 }
+
+button {
+  margin: 10px;
+  padding: 10px 20px;
+  background: #22c55e;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.cards {
+  display: flex;
+  justify-content: space-around;
+  margin: 20px;
+  flex-wrap: wrap;
+}
+
+.card {
+  padding: 15px;
+  border-radius: 12px;
+  width: 28%;
+  margin: 5px;
+}
+
+.gold { background: gold; color: black; }
+.silver { background: silver; color: black; }
+.bronze { background: #cd7f32; color: black; }
 
 table {
   width: 95%;
@@ -39,27 +69,13 @@ tr:hover {
   background: #334155;
 }
 
-.top {
-  color: gold;
-  font-weight: bold;
-}
-
-button {
-  margin: 15px;
-  padding: 10px 20px;
-  background: #22c55e;
-  border: none;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
 .footer {
-  margin-top: 10px;
+  margin: 10px;
   font-size: 13px;
   color: #94a3b8;
 }
 </style>
+
 </head>
 
 <body>
@@ -67,6 +83,8 @@ button {
 <h1>🏏 IPL Prediction League</h1>
 
 <button onclick="loadData()">🔄 Refresh</button>
+
+<div class="cards" id="top3"></div>
 
 <table id="table"></table>
 
@@ -84,38 +102,62 @@ fetch(sheetURL)
 .then(res => res.text())
 .then(data => {
 
-const rows = data.trim().split("\n").map(r => r.split(","));
+let rows = data.trim().split("\n").map(r => r.split(","));
 
-let html = "<tr>";
+let header = rows[0];
+let players = rows.slice(1);
 
-rows[0].forEach(h => html += `<th>${h}</th>`);
+// 🔥 SORT BY POINTS
+players.sort((a, b) => Number(b[1]) - Number(a[1]));
+
+// 🧠 RANK LOGIC
+let lastPoints = null;
+let rank = 0;
+
+let html = "<tr><th>Rank</th>";
+header.forEach(h => html += `<th>${h}</th>`);
 html += "<th>Status</th><th>Reason</th></tr>";
 
-for(let i=1; i<rows.length; i++){
+let topHTML = "";
 
-if(rows[i][0]){
+players.forEach((row, index) => {
 
-let winner = rows[i][4];
-let batsman = rows[i][5];
-let exact = rows[i][6];
+if(row[0]){
 
-let status = "";
-if(winner==1 && batsman==1) status = "✅🔥";
-else if(winner==1) status = "✅";
-else if(batsman==1) status = "🔥";
-else status = "❌";
+let points = Number(row[1]);
 
-let reason = "No Win ❌";
-if(exact==1) reason = "🏆 Exact Winner";
-else if(winner==1) reason = "Won from Winner Pool";
-else if(batsman==1) reason = "Won from Batsman Pool";
+if(points !== lastPoints){
+rank = index + 1;
+lastPoints = points;
+}
 
+// STATUS
+let status = row[3];
+
+// REASON
+let reason = row[4];
+
+// TOP 3 CARDS
+if(rank <= 3){
+let cls = rank==1 ? "gold" : rank==2 ? "silver" : "bronze";
+
+topHTML += `
+<div class="card ${cls}">
+<h3>#${rank}</h3>
+<p><b>${row[0]}</b></p>
+<p>Points: ${row[1]}</p>
+<p>₹ ${row[2]}</p>
+</div>`;
+}
+
+// TABLE
 html += "<tr>";
+html += `<td><b>${rank}</b></td>`;
 
-rows[i].forEach((c, index) => {
+row.forEach((c, i) => {
 
-if(index==1 && i==1){
-html += `<td class="top">${c}</td>`;
+if(i==0 && rank==1){
+html += `<td style="color:gold;font-weight:bold">${c}</td>`;
 }else{
 html += `<td>${c}</td>`;
 }
@@ -129,9 +171,10 @@ html += "</tr>";
 
 }
 
-}
+});
 
 document.getElementById("table").innerHTML = html;
+document.getElementById("top3").innerHTML = topHTML;
 
 });
 
