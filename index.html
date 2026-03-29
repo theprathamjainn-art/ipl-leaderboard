@@ -10,39 +10,15 @@ body {
   background: #0f172a;
   color: white;
   text-align: center;
-  margin: 0;
 }
 
 h1 {
   color: #22c55e;
-  padding: 15px;
 }
-
-.container {
-  width: 95%;
-  margin: auto;
-}
-
-.cards {
-  display: flex;
-  justify-content: space-around;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-}
-
-.card {
-  padding: 15px;
-  border-radius: 12px;
-  width: 30%;
-  margin: 5px;
-}
-
-.gold { background: gold; color: black; }
-.silver { background: silver; color: black; }
-.bronze { background: #cd7f32; color: black; }
 
 table {
-  width: 100%;
+  width: 95%;
+  margin: auto;
   border-collapse: collapse;
   background: #1e293b;
   border-radius: 10px;
@@ -63,6 +39,11 @@ tr:hover {
   background: #334155;
 }
 
+.top {
+  color: gold;
+  font-weight: bold;
+}
+
 button {
   margin: 15px;
   padding: 10px 20px;
@@ -79,7 +60,6 @@ button {
   color: #94a3b8;
 }
 </style>
-
 </head>
 
 <body>
@@ -88,16 +68,10 @@ button {
 
 <button onclick="loadData()">🔄 Refresh</button>
 
-<div class="container">
-
-<div class="cards" id="top3"></div>
-
 <table id="table"></table>
 
 <div class="footer">
 Live • Auto Updated • Share in WhatsApp 🚀
-</div>
-
 </div>
 
 <script>
@@ -107,45 +81,59 @@ const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQkqhjf4MFdkGt
 function loadData(){
 
 fetch(sheetURL)
-  .then(res => res.text())
-  .then(data => {
+.then(res => res.text())
+.then(data => {
 
-    const rows = data.trim().split("\n").map(r => r.split(","));
+const rows = data.trim().split("\n").map(r => r.split(","));
 
-    let tableHTML = "<tr>";
-    rows[0].forEach(h => tableHTML += `<th>${h}</th>`);
-    tableHTML += "</tr>";
+let html = "<tr>";
 
-    let topHTML = "";
+rows[0].forEach(h => html += `<th>${h}</th>`);
+html += "<th>Status</th><th>Reason</th></tr>";
 
-    for(let i=1; i<rows.length; i++){
+for(let i=1; i<rows.length; i++){
 
-      if(rows[i][0]){
+if(rows[i][0]){
 
-        tableHTML += "<tr>";
-        rows[i].forEach(c => tableHTML += `<td>${c}</td>`);
-        tableHTML += "</tr>";
+let winner = rows[i][4];
+let batsman = rows[i][5];
+let exact = rows[i][6];
 
-        // TOP 3 CARDS
-        if(i <= 3){
-          let cls = i==1 ? "gold" : i==2 ? "silver" : "bronze";
+let status = "";
+if(winner==1 && batsman==1) status = "✅🔥";
+else if(winner==1) status = "✅";
+else if(batsman==1) status = "🔥";
+else status = "❌";
 
-          topHTML += `
-          <div class="card ${cls}">
-            <h3>#${i}</h3>
-            <p><b>${rows[i][1]}</b></p>
-            <p>Points: ${rows[i][2]}</p>
-            <p>₹ ${rows[i][3]}</p>
-          </div>`;
-        }
+let reason = "No Win ❌";
+if(exact==1) reason = "🏆 Exact Winner";
+else if(winner==1) reason = "Won from Winner Pool";
+else if(batsman==1) reason = "Won from Batsman Pool";
 
-      }
-    }
+html += "<tr>";
 
-    document.getElementById("table").innerHTML = tableHTML;
-    document.getElementById("top3").innerHTML = topHTML;
+rows[i].forEach((c, index) => {
 
-  });
+if(index==1 && i==1){
+html += `<td class="top">${c}</td>`;
+}else{
+html += `<td>${c}</td>`;
+}
+
+});
+
+html += `<td>${status}</td>`;
+html += `<td>${reason}</td>`;
+
+html += "</tr>";
+
+}
+
+}
+
+document.getElementById("table").innerHTML = html;
+
+});
 
 }
 
