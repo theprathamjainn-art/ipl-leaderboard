@@ -13,19 +13,25 @@ body {
   margin: 0;
 }
 
-h1 {
-  color: #22c55e;
-  padding: 15px;
-}
+h1 { color: #22c55e; padding: 15px; }
 
 button {
-  margin: 10px;
   padding: 10px 20px;
   background: #22c55e;
   border: none;
   border-radius: 8px;
-  font-weight: bold;
   cursor: pointer;
+}
+
+.submit-btn {
+  display: inline-block;
+  margin: 10px;
+  padding: 10px 20px;
+  background: orange;
+  color: black;
+  border-radius: 8px;
+  font-weight: bold;
+  text-decoration: none;
 }
 
 .cards {
@@ -39,7 +45,6 @@ button {
   padding: 15px;
   border-radius: 12px;
   width: 28%;
-  margin: 5px;
 }
 
 .gold { background: gold; color: black; }
@@ -51,8 +56,6 @@ table {
   margin: auto;
   border-collapse: collapse;
   background: #1e293b;
-  border-radius: 10px;
-  overflow: hidden;
 }
 
 th, td {
@@ -60,33 +63,9 @@ th, td {
   border-bottom: 1px solid #334155;
 }
 
-th {
-  background: #22c55e;
-  color: black;
-}
+th { background: #22c55e; color: black; }
 
-tr:hover {
-  background: #334155;
-}
-
-.footer {
-  margin: 10px;
-  font-size: 13px;
-  color: #94a3b8;
-}
-
-.submit-btn {
-  display: inline-block;
-  margin-top: 10px;
-  padding: 10px 20px;
-  background: #f59e0b;
-  color: black;
-  border-radius: 8px;
-  font-weight: bold;
-  text-decoration: none;
-}
 </style>
-
 </head>
 
 <body>
@@ -97,17 +76,15 @@ tr:hover {
 
 <br>
 
-<a class="submit-btn" href="https://docs.google.com/forms/d/e/1FAIpQLSeioQJZrqyLZPa0nGyin5-N2ImvSERcHZsSK1_c3bqSBoxJvQ/viewform?usp=dialog" target="_blank">
+<a class="submit-btn"
+href="https://docs.google.com/forms/d/e/1FAIpQLSeioQJZrqyLZPa0nGyin5-N2ImvSERcHZsSK1_c3bqSBoxJvQ/viewform?usp=dialog"
+target="_blank">
 📝 Submit Prediction
 </a>
 
-<div class="cards" id="top3"></div>
+<div id="top3" class="cards"></div>
 
 <table id="table"></table>
-
-<div class="footer">
-Live • Auto Updated • Share in WhatsApp 🚀
-</div>
 
 <script>
 
@@ -120,26 +97,29 @@ fetch(sheetURL)
 .then(data => {
 
 let rows = data.trim().split("\n").map(r => r.split(","));
-
-let header = rows[0];
 let players = rows.slice(1);
 
 // ✅ SORT BY POINTS
-players.sort((a, b) => Number(b[1]) - Number(a[1]));
+players.sort((a,b)=> Number(b[1]) - Number(a[1]));
 
-// ✅ RANK LOGIC
-let lastPoints = null;
+// ✅ RANK FIX
 let rank = 0;
+let lastPoints = null;
 
-let html = "<tr><th>Rank</th>";
-header.forEach(h => html += `<th>${h}</th>`);
-html += "<th>Status</th><th>Reason</th></tr>";
+let tableHTML = `
+<tr>
+<th>Rank</th>
+<th>Name</th>
+<th>Points</th>
+<th>Amount</th>
+<th>Status</th>
+<th>Reason</th>
+</tr>
+`;
 
 let topHTML = "";
 
-players.forEach((row, index) => {
-
-if(row[0]){
+players.forEach((row, index)=>{
 
 let name = row[0];
 let points = Number(row[1]);
@@ -153,7 +133,7 @@ rank = index + 1;
 lastPoints = points;
 }
 
-// ✅ TOP 3 FIXED
+// ✅ TOP 3 FIXED PERFECT
 if(rank <= 3){
 let cls = rank==1 ? "gold" : rank==2 ? "silver" : "bronze";
 
@@ -167,28 +147,20 @@ topHTML += `
 }
 
 // TABLE
-html += "<tr>";
-html += `<td><b>${rank}</b></td>`;
-
-row.forEach((c, i) => {
-
-if(i==0 && rank==1){
-html += `<td style="color:gold;font-weight:bold">${c}</td>`;
-}else{
-html += `<td>${c}</td>`;
-}
-
-});
-
-html += `<td>${status}</td>`;
-html += `<td>${reason}</td>`;
-html += "</tr>";
-
-}
+tableHTML += `
+<tr>
+<td>${rank}</td>
+<td>${name}</td>
+<td>${points}</td>
+<td>${amount}</td>
+<td>${status}</td>
+<td>${reason}</td>
+</tr>
+`;
 
 });
 
-document.getElementById("table").innerHTML = html;
+document.getElementById("table").innerHTML = tableHTML;
 document.getElementById("top3").innerHTML = topHTML;
 
 });
