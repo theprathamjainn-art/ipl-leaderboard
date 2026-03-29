@@ -74,6 +74,17 @@ tr:hover {
   font-size: 13px;
   color: #94a3b8;
 }
+
+.submit-btn {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 10px 20px;
+  background: #f59e0b;
+  color: black;
+  border-radius: 8px;
+  font-weight: bold;
+  text-decoration: none;
+}
 </style>
 
 </head>
@@ -83,6 +94,12 @@ tr:hover {
 <h1>🏏 IPL Prediction League</h1>
 
 <button onclick="loadData()">🔄 Refresh</button>
+
+<br>
+
+<a class="submit-btn" href="https://docs.google.com/forms/d/e/1FAIpQLSeioQJZrqyLZPa0nGyin5-N2ImvSERcHZsSK1_c3bqSBoxJvQ/viewform?usp=dialog" target="_blank">
+📝 Submit Prediction
+</a>
 
 <div class="cards" id="top3"></div>
 
@@ -107,10 +124,10 @@ let rows = data.trim().split("\n").map(r => r.split(","));
 let header = rows[0];
 let players = rows.slice(1);
 
-// 🔥 SORT BY POINTS
+// ✅ SORT BY POINTS
 players.sort((a, b) => Number(b[1]) - Number(a[1]));
 
-// 🧠 RANK LOGIC
+// ✅ RANK LOGIC
 let lastPoints = null;
 let rank = 0;
 
@@ -124,29 +141,28 @@ players.forEach((row, index) => {
 
 if(row[0]){
 
+let name = row[0];
 let points = Number(row[1]);
+let amount = row[2];
+let status = row[3];
+let reason = row[4];
 
+// rank logic
 if(points !== lastPoints){
 rank = index + 1;
 lastPoints = points;
 }
 
-// STATUS
-let status = row[3];
-
-// REASON
-let reason = row[4];
-
-// TOP 3 CARDS
+// ✅ TOP 3 FIXED
 if(rank <= 3){
 let cls = rank==1 ? "gold" : rank==2 ? "silver" : "bronze";
 
 topHTML += `
 <div class="card ${cls}">
 <h3>#${rank}</h3>
-<p><b>${row[0]}</b></p>
-<p>Points: ${row[1]}</p>
-<p>₹ ${row[2]}</p>
+<p><b>${name}</b></p>
+<p>Points: ${points}</p>
+<p>₹ ${amount}</p>
 </div>`;
 }
 
@@ -166,7 +182,6 @@ html += `<td>${c}</td>`;
 
 html += `<td>${status}</td>`;
 html += `<td>${reason}</td>`;
-
 html += "</tr>";
 
 }
