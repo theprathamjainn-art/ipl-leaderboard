@@ -2,7 +2,6 @@
 <html>
 <head>
 <title>IPL Prediction League</title>
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -12,7 +11,6 @@ body {
   color: white;
   text-align: center;
   margin: 0;
-  padding: 0;
 }
 
 h1 {
@@ -20,10 +18,32 @@ h1 {
   padding: 15px;
 }
 
-table {
-  margin: auto;
-  border-collapse: collapse;
+.container {
   width: 95%;
+  margin: auto;
+}
+
+.cards {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.card {
+  padding: 15px;
+  border-radius: 12px;
+  width: 30%;
+  margin: 5px;
+}
+
+.gold { background: gold; color: black; }
+.silver { background: silver; color: black; }
+.bronze { background: #cd7f32; color: black; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
   background: #1e293b;
   border-radius: 10px;
   overflow: hidden;
@@ -43,13 +63,19 @@ tr:hover {
   background: #334155;
 }
 
-.rank1 { color: gold; font-weight: bold; }
-.rank2 { color: silver; }
-.rank3 { color: #cd7f32; }
+button {
+  margin: 15px;
+  padding: 10px 20px;
+  background: #22c55e;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
 
 .footer {
-  margin-top: 15px;
-  font-size: 14px;
+  margin-top: 10px;
+  font-size: 13px;
   color: #94a3b8;
 }
 </style>
@@ -60,15 +86,25 @@ tr:hover {
 
 <h1>🏏 IPL Prediction League</h1>
 
+<button onclick="loadData()">🔄 Refresh</button>
+
+<div class="container">
+
+<div class="cards" id="top3"></div>
+
 <table id="table"></table>
 
 <div class="footer">
 Live • Auto Updated • Share in WhatsApp 🚀
 </div>
 
+</div>
+
 <script>
 
 const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQkqhjf4MFdkGtA4waWvQWerNMNBk669hqRM03Wz_HgTV3MU3OEVSkIMO-31gncNRMKCs6PBzhkwVhN/pub?gid=1572340045&single=true&output=csv";
+
+function loadData(){
 
 fetch(sheetURL)
   .then(res => res.text())
@@ -76,26 +112,44 @@ fetch(sheetURL)
 
     const rows = data.trim().split("\n").map(r => r.split(","));
 
-    let html = "<tr>";
-    rows[0].forEach(h => html += `<th>${h}</th>`);
-    html += "</tr>";
+    let tableHTML = "<tr>";
+    rows[0].forEach(h => tableHTML += `<th>${h}</th>`);
+    tableHTML += "</tr>";
+
+    let topHTML = "";
 
     for(let i=1; i<rows.length; i++){
+
       if(rows[i][0]){
 
-        let cls = "";
-        if(i==1) cls="rank1";
-        else if(i==2) cls="rank2";
-        else if(i==3) cls="rank3";
+        tableHTML += "<tr>";
+        rows[i].forEach(c => tableHTML += `<td>${c}</td>`);
+        tableHTML += "</tr>";
 
-        html += `<tr class="${cls}">`;
-        rows[i].forEach(c => html += `<td>${c}</td>`);
-        html += "</tr>";
+        // TOP 3 CARDS
+        if(i <= 3){
+          let cls = i==1 ? "gold" : i==2 ? "silver" : "bronze";
+
+          topHTML += `
+          <div class="card ${cls}">
+            <h3>#${i}</h3>
+            <p><b>${rows[i][1]}</b></p>
+            <p>Points: ${rows[i][2]}</p>
+            <p>₹ ${rows[i][3]}</p>
+          </div>`;
+        }
+
       }
     }
 
-    document.getElementById("table").innerHTML = html;
+    document.getElementById("table").innerHTML = tableHTML;
+    document.getElementById("top3").innerHTML = topHTML;
+
   });
+
+}
+
+loadData();
 
 </script>
 
